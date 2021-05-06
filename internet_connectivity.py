@@ -4,7 +4,11 @@ import signal
 import socket
 import sys
 import time
+from smbus2 import SMBus
 
+DEVICE_BUS = 1
+DEVICE_ADDR = 0x10
+bus = SMBus(DEVICE_BUS)
 
 def internet(host = "8.8.8.8", port = 53, timeout = 4):
     '''
@@ -57,6 +61,15 @@ def perpetual_connection_monitor(interval):
 
     while True:
         if internet():
+            print("The internet is on")
+            bus.write_byte_data(DEVICE_ADDR, 1, 0xFF)
+            time.sleep(1)
+            bus.write_byte_data(DEVICE_ADDR, 1, 0x00)
+            time.sleep(1)
+            bus.write_byte_data(DEVICE_ADDR, 2, 0xFF)
+            time.sleep(1)
+            bus.write_byte_data(DEVICE_ADDR, 2, 0x00)
+            time.sleep(1)
             time.sleep(interval)
         else:
             total_downtime_seconds = 0
@@ -69,6 +82,15 @@ def perpetual_connection_monitor(interval):
 
             # Check every 'interval' seconds to see if the connection is back. Sum up the outage time in seconds by adding 'interval' to the total. 
             while not internet():
+                print("Lost connection, trying to reconnect.")
+                bus.write_byte_data(DEVICE_ADDR, 3, 0xFF)
+                time.sleep(1)
+                bus.write_byte_data(DEVICE_ADDR, 3, 0x00)
+                time.sleep(1)
+                bus.write_byte_data(DEVICE_ADDR, 4, 0xFF)
+                time.sleep(1)
+                bus.write_byte_data(DEVICE_ADDR, 4, 0x00)
+                time.sleep(1)
                 time.sleep(interval)
                 #total_downtime_seconds += interval
 
